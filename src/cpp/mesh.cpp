@@ -56,6 +56,14 @@ public:
     return dist.toVector();
   }
 
+  // Solve for distance from a single point on a face
+  Vector<double> compute_distance_from_face(int64_t startFace, Eigen::Vector3d bary_coords) {
+    Face face = mesh->face(startFace);
+    Vector3 bary{bary_coords(0), bary_coords(1), bary_coords(2)};
+    VertexData<double> dist = solver->computeDistance(SurfacePoint(face, bary));
+    return dist.toVector();
+  }
+
   // Solve for distance from a collection of vertices
   Vector<double> compute_distance_multisource(Vector<int64_t> sourceVerts) {
     std::vector<Vertex> sources;
@@ -408,7 +416,8 @@ void bind_mesh(py::module& m) {
   py::class_<HeatMethodDistanceEigen>(m, "MeshHeatMethodDistance")
         .def(py::init<DenseMatrix<double>, DenseMatrix<int64_t>, double, bool>())
         .def("compute_distance", &HeatMethodDistanceEigen::compute_distance, py::arg("source_vert"))
-        .def("compute_distance_multisource", &HeatMethodDistanceEigen::compute_distance_multisource, py::arg("source_verts"));
+        .def("compute_distance_multisource", &HeatMethodDistanceEigen::compute_distance_multisource, py::arg("source_verts"))
+        .def("compute_distance_from_face", &HeatMethodDistanceEigen::compute_distance_from_face, py::arg("start_face"), py::arg("bary_coords"));
  
 
   py::class_<VectorHeatMethodEigen>(m, "MeshVectorHeatMethod")
